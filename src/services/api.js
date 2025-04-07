@@ -1,60 +1,122 @@
 // Mock data
-let recipes = [
+const defaultRecipes = [
   {
     id: '1',
     title: 'Classic Margherita Pizza',
-    description: 'Traditional Italian pizza with fresh ingredients',
+    description: 'Traditional Italian pizza with fresh mozzarella, basil, and tomato sauce',
     ingredients: [
       '2 cups flour',
-      '1 cup water',
+      '1 cup warm water',
       'Fresh mozzarella',
-      'Fresh basil',
-      'Tomato sauce'
+      'Fresh basil leaves',
+      'Tomato sauce',
+      'Olive oil',
+      'Salt',
+      'Active dry yeast'
     ],
-    instructions: 'Mix dough, let rise, top with ingredients, bake at 450°F',
-    image: 'https://example.com/pizza.jpg',
+    instructions: [
+      'Mix flour, yeast, and salt in a bowl',
+      'Add warm water and olive oil, knead into dough',
+      'Let rise for 1 hour',
+      'Roll out dough and add toppings',
+      'Bake at 450°F for 12-15 minutes'
+    ],
+    image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
     cookingTime: 30,
     servings: 4,
     rating: 4.5,
     reviews: [],
     createdAt: '2024-03-15T10:00:00Z',
     userId: 'user1',
+    dietary: ['vegetarian'],
     trending: true
   },
   {
     id: '2',
-    title: 'Vegan Buddha Bowl',
-    description: 'Healthy and colorful bowl packed with nutrients',
+    title: 'Creamy Garlic Pasta',
+    description: 'A rich and creamy pasta dish with garlic and parmesan',
     ingredients: [
-      'Quinoa',
-      'Chickpeas',
-      'Avocado',
-      'Sweet potato',
-      'Kale'
+      '8 oz pasta',
+      '4 tbsp butter',
+      '4 cloves garlic, minced',
+      '2 cups heavy cream',
+      '1 cup grated parmesan',
+      'Salt and pepper to taste',
+      'Fresh parsley, chopped'
     ],
-    instructions: 'Cook quinoa, roast vegetables, assemble bowl',
-    image: 'https://example.com/buddha-bowl.jpg',
+    instructions: [
+      'Cook pasta according to package directions. Drain and set aside.',
+      'In a large skillet, melt butter over medium heat.',
+      'Add minced garlic and sauté for 1-2 minutes until fragrant.',
+      'Pour in heavy cream and bring to a simmer.',
+      'Reduce heat and stir in parmesan cheese until melted and smooth.',
+      'Add the cooked pasta to the sauce and toss to coat evenly.',
+      'Season with salt and pepper to taste.',
+      'Garnish with chopped parsley before serving.'
+    ],
+    image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     cookingTime: 25,
-    servings: 2,
+    servings: 4,
     rating: 4.8,
     reviews: [],
     createdAt: '2024-03-14T15:30:00Z',
     userId: 'user2',
+    dietary: ['vegetarian'],
     trending: false
+  },
+  {
+    id: '3',
+    title: 'Classic Beef Burger',
+    description: 'Juicy homemade beef burger with all the fixings',
+    ingredients: [
+      '1 lb ground beef',
+      '1 egg',
+      '1/4 cup breadcrumbs',
+      '1 tsp salt',
+      '1/2 tsp black pepper',
+      '1/2 tsp garlic powder',
+      '4 burger buns',
+      'Lettuce, tomato, onion for serving',
+      'Cheese slices',
+      'Ketchup and mustard'
+    ],
+    instructions: [
+      'In a large bowl, mix ground beef, egg, breadcrumbs, salt, pepper, and garlic powder.',
+      'Form into 4 equal-sized patties, making a slight indentation in the center of each.',
+      'Heat a grill or skillet over medium-high heat.',
+      'Cook patties for 4-5 minutes per side for medium doneness.',
+      'Add cheese slices on top during the last minute of cooking.',
+      'Toast burger buns lightly on the grill or in a toaster.',
+      'Assemble burgers with lettuce, tomato, onion, and condiments.',
+      'Serve immediately.'
+    ],
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+    cookingTime: 20,
+    servings: 4,
+    rating: 4.9,
+    reviews: [],
+    createdAt: '2024-03-13T12:00:00Z',
+    userId: 'user3',
+    dietary: [],
+    trending: true
   }
 ];
 
 // Helper function to simulate API delay
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Get recipes from localStorage or use mock data
-const getStoredRecipes = () => {
+// Initialize localStorage with default recipes if empty
+const initializeStorage = () => {
   const stored = localStorage.getItem('recipes');
-  if (stored) {
-    return JSON.parse(stored);
+  if (!stored) {
+    localStorage.setItem('recipes', JSON.stringify(defaultRecipes));
   }
-  localStorage.setItem('recipes', JSON.stringify(recipes));
-  return recipes;
+};
+
+// Get recipes from localStorage
+const getStoredRecipes = () => {
+  initializeStorage();
+  return JSON.parse(localStorage.getItem('recipes')) || [];
 };
 
 // Save recipes to localStorage
@@ -66,13 +128,14 @@ const saveRecipes = (recipes) => {
 export const api = {
   // Get all recipes
   getRecipes: async () => {
-    await delay(500); // Simulate network delay
-    return [...recipes];
+    await delay(500);
+    return getStoredRecipes();
   },
 
   // Get a single recipe by ID
   getRecipe: async (id) => {
     await delay(300);
+    const recipes = getStoredRecipes();
     const recipe = recipes.find(r => r.id === id);
     if (!recipe) {
       throw new Error('Recipe not found');
@@ -83,21 +146,25 @@ export const api = {
   // Create a new recipe
   createRecipe: async (recipeData) => {
     await delay(500);
+    const recipes = getStoredRecipes();
     const newRecipe = {
       ...recipeData,
-      id: String(Date.now()), // Generate a unique ID
+      id: String(Date.now()),
       createdAt: new Date().toISOString(),
       rating: 0,
       reviews: [],
+      // Set a default image if none provided
+      image: recipeData.image || 'https://images.unsplash.com/photo-1495195134817-aeb325a55b65?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
     };
-    recipes = [...recipes, newRecipe];
-    saveRecipes(recipes);
+    const updatedRecipes = [...recipes, newRecipe];
+    saveRecipes(updatedRecipes);
     return newRecipe;
   },
 
   // Update a recipe
   updateRecipe: async (id, recipeData) => {
     await delay(500);
+    const recipes = getStoredRecipes();
     const index = recipes.findIndex(r => r.id === id);
     if (index === -1) {
       throw new Error('Recipe not found');
@@ -107,32 +174,45 @@ export const api = {
       ...recipeData,
       id, // Ensure ID doesn't change
     };
-    recipes = recipes.map(r => r.id === id ? updatedRecipe : r);
-    saveRecipes(recipes);
+    const updatedRecipes = recipes.map(r => r.id === id ? updatedRecipe : r);
+    saveRecipes(updatedRecipes);
     return updatedRecipe;
   },
 
   // Delete a recipe
   deleteRecipe: async (id) => {
     await delay(500);
+    const recipes = getStoredRecipes();
     const index = recipes.findIndex(r => r.id === id);
     if (index === -1) {
       throw new Error('Recipe not found');
     }
-    recipes = recipes.filter(r => r.id !== id);
-    saveRecipes(recipes);
+    const updatedRecipes = recipes.filter(r => r.id !== id);
+    saveRecipes(updatedRecipes);
     return true;
   },
 
   // Search recipes
   searchRecipes: async (query) => {
     await delay(300);
+    const recipes = getStoredRecipes();
     const lowercaseQuery = query.toLowerCase();
     return recipes.filter(recipe =>
       recipe.title.toLowerCase().includes(lowercaseQuery) ||
       recipe.description.toLowerCase().includes(lowercaseQuery) ||
       recipe.ingredients.some(ing => ing.toLowerCase().includes(lowercaseQuery))
     );
+  },
+
+  // Get favorite recipes
+  getFavoriteRecipes: async () => {
+    await delay(300);
+    const currentUser = auth.getCurrentUser();
+    if (!currentUser || !currentUser.favorites) {
+      return [];
+    }
+    const recipes = getStoredRecipes();
+    return recipes.filter(recipe => currentUser.favorites.includes(recipe.id));
   },
 
   // Filter recipes by dietary restrictions

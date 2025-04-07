@@ -37,6 +37,9 @@ const getTheme = (darkMode) => createTheme({
     },
     divider: darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.12)',
   },
+  h1: {
+    color: darkMode ? '#FFFFFF' : '#000000',
+  },
   TextField: {
     styleOverrides: {
       root: {

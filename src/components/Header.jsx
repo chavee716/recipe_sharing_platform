@@ -85,7 +85,7 @@ const Header = () => {
         }}
       >
         <RestaurantMenuIcon sx={{ mr: 1 }} />
-        Flavor Exchanges
+        Flavor Exchange
       </Typography>
       <Divider />
       <List>
