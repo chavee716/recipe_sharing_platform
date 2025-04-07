@@ -207,12 +207,23 @@ export const api = {
   // Get favorite recipes
   getFavoriteRecipes: async () => {
     await delay(300);
-    const currentUser = auth.getCurrentUser();
-    if (!currentUser || !currentUser.favorites) {
+    const user = auth.getCurrentUser();
+    
+    if (!user || !Array.isArray(user.favorites)) {
+      console.log('No user or favorites found');
       return [];
     }
+    
     const recipes = getStoredRecipes();
-    return recipes.filter(recipe => currentUser.favorites.includes(recipe.id));
+    console.log('All recipes:', recipes);
+    console.log('User favorites:', user.favorites);
+    
+    const favoriteRecipes = recipes.filter(recipe => 
+      user.favorites.includes(String(recipe.id))
+    );
+    
+    console.log('Filtered favorite recipes:', favoriteRecipes);
+    return favoriteRecipes;
   },
 
   // Filter recipes by dietary restrictions
@@ -284,21 +295,36 @@ export const auth = {
     return updatedUser;
   },
 
-  // Toggle favorite recipe
+  // Toggle favorite
   toggleFavorite: async (recipeId) => {
     await delay(300);
-    const currentUser = auth.getCurrentUser();
-    if (!currentUser) throw new Error('No user logged in');
+    const user = auth.getCurrentUser();
+    if (!user) throw new Error('Must be logged in to favorite recipes');
 
-    const favorites = currentUser.favorites || [];
-    const isFavorite = favorites.includes(recipeId);
+    // Initialize favorites array if it doesn't exist
+    const favorites = Array.isArray(user.favorites) ? user.favorites : [];
     
+    // Convert recipeId to string for consistent comparison
+    const recipeIdString = String(recipeId);
+    
+    // Check if recipe is already favorited
+    const isFavorite = favorites.includes(recipeIdString);
+    
+    // Update favorites array
     const updatedFavorites = isFavorite
-      ? favorites.filter(id => id !== recipeId)
-      : [...favorites, recipeId];
+      ? favorites.filter(id => id !== recipeIdString)
+      : [...favorites, recipeIdString];
     
-    const updatedUser = { ...currentUser, favorites: updatedFavorites };
+    // Update user object
+    const updatedUser = {
+      ...user,
+      favorites: updatedFavorites
+    };
+    
+    // Save to localStorage
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    
+    console.log('Updated user favorites:', updatedUser.favorites);
     return updatedUser;
   }
 }; 

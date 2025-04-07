@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 
 const RecipeContext = createContext();
@@ -18,6 +18,7 @@ export const RecipeProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [dietaryFilters, setDietaryFilters] = useState([]);
+  const [recipeCache, setRecipeCache] = useState({});
 
   // Fetch all recipes on mount
   useEffect(() => {
@@ -44,81 +45,88 @@ export const RecipeProvider = ({ children }) => {
   };
 
   const filterRecipes = async () => {
-    try {
-      setLoading(true);
-      let filtered = [...recipes];
+    let filtered = [...recipes];
 
-      // Apply search term filter
-      if (searchTerm) {
-        filtered = await api.searchRecipes(searchTerm);
-      }
-
-      // Apply dietary restrictions filter
-      if (dietaryFilters.length > 0) {
-        filtered = await api.filterRecipes(dietaryFilters);
-      }
-
-      setFilteredRecipes(filtered);
-    } catch (err) {
-      console.error('Error filtering recipes:', err);
-    } finally {
-      setLoading(false);
+    // Apply search term filter
+    if (searchTerm) {
+      filtered = filtered.filter(recipe =>
+        recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        recipe.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
+
+    // Apply dietary restrictions filter
+    if (dietaryFilters.length > 0) {
+      filtered = filtered.filter(recipe =>
+        recipe.dietary && dietaryFilters.every(filter => recipe.dietary.includes(filter))
+      );
+    }
+
+    setFilteredRecipes(filtered);
   };
+
+  const getRecipe = useCallback(async (id) => {
+    // Check cache first
+    if (recipeCache[id]) {
+      return recipeCache[id];
+    }
+
+    try {
+      const recipe = await api.getRecipe(id);
+      // Update cache
+      setRecipeCache(prev => ({
+        ...prev,
+        [id]: recipe
+      }));
+      return recipe;
+    } catch (err) {
+      throw new Error(err.message || 'Failed to fetch recipe');
+    }
+  }, [recipeCache]);
 
   const createRecipe = async (recipeData) => {
     try {
-      setLoading(true);
       const newRecipe = await api.createRecipe(recipeData);
       setRecipes(prevRecipes => [...prevRecipes, newRecipe]);
       return newRecipe;
     } catch (err) {
       throw new Error(err.message || 'Failed to create recipe');
-    } finally {
-      setLoading(false);
     }
   };
 
   const updateRecipe = async (id, recipeData) => {
     try {
-      setLoading(true);
       const updatedRecipe = await api.updateRecipe(id, recipeData);
       setRecipes(prevRecipes =>
         prevRecipes.map(recipe =>
           recipe.id === id ? updatedRecipe : recipe
         )
       );
+      // Update cache
+      setRecipeCache(prev => ({
+        ...prev,
+        [id]: updatedRecipe
+      }));
       return updatedRecipe;
     } catch (err) {
       throw new Error(err.message || 'Failed to update recipe');
-    } finally {
-      setLoading(false);
     }
   };
 
   const deleteRecipe = async (id) => {
     try {
-      setLoading(true);
       await api.deleteRecipe(id);
       setRecipes(prevRecipes =>
         prevRecipes.filter(recipe => recipe.id !== id)
       );
+      // Remove from cache
+      setRecipeCache(prev => {
+        const newCache = { ...prev };
+        delete newCache[id];
+        return newCache;
+      });
     } catch (err) {
       throw new Error(err.message || 'Failed to delete recipe');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getRecipe = async (id) => {
-    try {
-      setLoading(true);
-      const recipe = await api.getRecipe(id);
-      return recipe;
-    } catch (err) {
-      throw new Error(err.message || 'Failed to fetch recipe');
-    } finally {
-      setLoading(false);
     }
   };
 

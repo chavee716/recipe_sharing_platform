@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
 import { AuthProvider } from './context/AuthContext';
 import { RecipeProvider } from './context/RecipeContext';
-import { ThemeProvider } from './context/ThemeContext';
-import { useThemeMode } from './context/ThemeContext';
+import { ThemeProvider, useThemeMode } from './context/ThemeContext';
 import getTheme from './theme';
 
 // Components
@@ -16,13 +15,13 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import MealPlanner from './pages/MealPlanner';
+import ShoppingList from './pages/ShoppingList';
 import RecipeDetails from './pages/RecipeDetails';
 import CreateRecipe from './pages/CreateRecipe';
 import EditRecipe from './pages/EditRecipe';
 import Favorites from './pages/Favorites';
 import NotFound from './pages/NotFound';
-import MealPlanner from './pages/MealPlanner';
-import ShoppingList from './pages/ShoppingList';
 
 const AppContent = () => {
   const { darkMode } = useThemeMode();
@@ -40,6 +39,8 @@ const AppContent = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/recipe/:id" element={<RecipeDetails />} />
+                <Route path="/meal-planner" element={<MealPlanner />} />
+                <Route path="/shopping-list" element={<ShoppingList />} />
                 
                 {/* Protected Routes */}
                 <Route
@@ -57,14 +58,6 @@ const AppContent = () => {
                 <Route
                   path="/favorites"
                   element={<PrivateRoute><Favorites /></PrivateRoute>}
-                />
-                <Route
-                  path="/meal-planner"
-                  element={<PrivateRoute><MealPlanner /></PrivateRoute>}
-                />
-                <Route
-                  path="/shopping-list"
-                  element={<PrivateRoute><ShoppingList /></PrivateRoute>}
                 />
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -44,7 +44,7 @@ const Profile = () => {
   );
 
   const userRecipes = recipes.filter(recipe => 
-    recipe.creator === user?.id
+    recipe.creatorId === user?.id || recipe.creator === user?.id
   );
 
   const handleTabChange = (event, newValue) => {
@@ -70,7 +70,7 @@ const Profile = () => {
     setIsSubmitting(true);
 
     try {
-      await updateProfile(profileData);
+      await updateProfile({ username: profileData.username });
       setUpdateSuccess('Profile updated successfully!');
       setIsEditing(false);
     } catch (error) {
@@ -82,10 +82,12 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name === 'username') {
+      setProfileData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   return (
@@ -153,8 +155,8 @@ const Profile = () => {
                     label="Email"
                     name="email"
                     type="email"
-                    value={profileData.email}
-                    onChange={handleChange}
+                    value={user?.email}
+                    disabled
                     margin="normal"
                     sx={{ mb: 2 }}
                   />

@@ -69,8 +69,25 @@ const RecipeDetails = () => {
       }
     };
 
-    fetchRecipe();
+    if (id) {
+      fetchRecipe();
+    }
+
+    return () => {
+      // Cleanup function
+      setRecipe(null);
+      setError(null);
+    };
   }, [id, user, getRecipe]);
+  
+  // Update isFavorite when user changes
+  useEffect(() => {
+    if (user && user.favorites) {
+      setIsFavorite(user.favorites.includes(id));
+    } else {
+      setIsFavorite(false);
+    }
+  }, [user, id]);
   
   // Check if user is the creator of this recipe
   const isCreator = recipe && user && recipe.creator === user.id;
