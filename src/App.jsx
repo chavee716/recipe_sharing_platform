@@ -16,7 +16,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import MealPlanner from './pages/MealPlanner';
-import ShoppingList from './pages/ShoppingList';
 import RecipeDetails from './pages/RecipeDetails';
 import CreateRecipe from './pages/CreateRecipe';
 import EditRecipe from './pages/EditRecipe';
@@ -40,7 +39,7 @@ const AppContent = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/recipe/:id" element={<RecipeDetails />} />
                 <Route path="/meal-planner" element={<MealPlanner />} />
-                <Route path="/shopping-list" element={<ShoppingList />} />
+                
                 
                 {/* Protected Routes */}
                 <Route

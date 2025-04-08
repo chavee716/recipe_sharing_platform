@@ -32,10 +32,11 @@ const CreateRecipe = () => {
     ingredients: [''],
     instructions: '',
     image: '',
-    cookingTime: '',
-    servings: '',
+    cookingTime: 1,
+    servings: 1,
     difficulty: 'medium',
     cuisine: '',
+    dietary: []
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -79,6 +80,18 @@ const CreateRecipe = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate servings and cooking time
+    if (formData.servings <= 0) {
+      setErrors(prev => ({ ...prev, servings: 'Servings must be greater than 0' }));
+      return;
+    }
+    
+    if (formData.cookingTime <= 0) {
+      setErrors(prev => ({ ...prev, cookingTime: 'Cooking time must be greater than 0' }));
+      return;
+    }
+
     const { isValid, errors: validationErrors } = validateRecipeForm(formData);
     
     if (!isValid) {
@@ -88,19 +101,18 @@ const CreateRecipe = () => {
 
     setIsSubmitting(true);
     try {
-      // Filter out empty ingredients
+      setErrors(null);
+      
       const cleanedFormData = {
         ...formData,
         ingredients: formData.ingredients.filter(ing => ing.trim() !== ''),
-        // Add default values for missing fields
-        rating: 0,
-        reviews: [],
-        createdAt: new Date().toISOString(),
-        userId: user.id, // Set the actual user ID
-        creator: user.id, // Add creator field
-        creatorId: user.id, // Add creatorId field for backward compatibility
+        userId: user.id,
+        creator: user.username,
+        creatorId: user.id,
+        servings: Math.max(1, parseInt(formData.servings)),
+        cookingTime: Math.max(1, parseInt(formData.cookingTime))
       };
-
+      
       await createRecipe(cleanedFormData);
       setSnackbar({
         open: true,
@@ -108,10 +120,10 @@ const CreateRecipe = () => {
         severity: 'success'
       });
       setTimeout(() => navigate('/'), 1500); // Navigate after showing success message
-    } catch (error) {
+    } catch (err) {
       setSnackbar({
         open: true,
-        message: error.message || 'Failed to create recipe',
+        message: err.message || 'Failed to create recipe',
         severity: 'error'
       });
     } finally {
@@ -177,7 +189,10 @@ const CreateRecipe = () => {
                 type="number"
                 value={formData.cookingTime}
                 onChange={handleChange}
+                error={!!errors.cookingTime}
+                helperText={errors.cookingTime}
                 disabled={isSubmitting}
+                inputProps={{ min: 1 }}
               />
             </Grid>
 
@@ -189,7 +204,10 @@ const CreateRecipe = () => {
                 type="number"
                 value={formData.servings}
                 onChange={handleChange}
+                error={!!errors.servings}
+                helperText={errors.servings}
                 disabled={isSubmitting}
+                inputProps={{ min: 1 }}
               />
             </Grid>
 

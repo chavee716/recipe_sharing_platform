@@ -67,8 +67,7 @@ const Navbar = () => {
     { text: 'My Recipes', icon: <Restaurant />, path: '/', requireAuth: false },
     { text: 'Favorites', icon: <Favorite />, path: '/favorites', requireAuth: true },
     { text: 'Create Recipe', icon: <AddCircleOutline />, path: '/create-recipe', requireAuth: true },
-    { text: 'Meal Planner', icon: <CalendarMonth />, path: '/meal-planner', requireAuth: true },
-    { text: 'Shopping List', icon: <ShoppingCart />, path: '/shopping-list', requireAuth: true },
+    { text: 'Meal Planner', icon: <CalendarMonth />, path: '/meal-planner', requireAuth: true }
   ];
 
   const drawer = (

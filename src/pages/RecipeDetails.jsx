@@ -91,7 +91,7 @@ const RecipeDetails = () => {
   }, [user, id]);
   
   // Check if user is the creator of this recipe
-  const isCreator = recipe && user && recipe.creator === user.id;
+  const isCreator = recipe && user && recipe.creatorId === user.id;
   
   const handleFavoriteClick = async () => {
     if (!user) {
@@ -268,7 +268,7 @@ const RecipeDetails = () => {
 
       {/* Creator Actions */}
       {isCreator && (
-        <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 2}}>
           <Button 
             variant="outlined" 
             startIcon={<Edit />}
