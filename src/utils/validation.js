@@ -24,8 +24,8 @@ export const validateRecipeForm = (formData) => {
     errors.ingredients = 'At least one ingredient is required';
   }
 
-  if (!formData.instructions?.trim()) {
-    errors.instructions = 'Instructions are required';
+  if (!formData.instructions?.length || formData.instructions.some(inst => !inst?.trim())) {
+    errors.instructions = 'At least one instruction step is required';
   }
 
   return {

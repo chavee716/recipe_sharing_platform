@@ -37,7 +37,7 @@ const EditRecipe = () => {
     title: '',
     description: '',
     ingredients: [''],
-    instructions: '',
+    instructions: [''],
     image: '',
     cookingTime: '',
     servings: '',
@@ -59,7 +59,9 @@ const EditRecipe = () => {
           title: recipe.title,
           description: recipe.description,
           ingredients: recipe.ingredients,
-          instructions: recipe.instructions,
+          instructions: Array.isArray(recipe.instructions) 
+            ? recipe.instructions 
+            : recipe.instructions ? [recipe.instructions] : [''],
           image: recipe.image,
           cookingTime: recipe.cookingTime,
           servings: recipe.servings,
@@ -118,6 +120,31 @@ const EditRecipe = () => {
     }
   };
 
+  const handleInstructionChange = (index, value) => {
+    const newInstructions = [...formData.instructions];
+    newInstructions[index] = value;
+    setFormData(prev => ({
+      ...prev,
+      instructions: newInstructions
+    }));
+  };
+
+  const addInstruction = () => {
+    setFormData(prev => ({
+      ...prev,
+      instructions: [...prev.instructions, '']
+    }));
+  };
+
+  const removeInstruction = (index) => {
+    if (formData.instructions.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        instructions: prev.instructions.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { isValid, errors: validationErrors } = validateRecipeForm(formData);
@@ -129,10 +156,11 @@ const EditRecipe = () => {
 
     setIsSubmitting(true);
     try {
-      // Filter out empty ingredients
+      // Filter out empty ingredients and instructions
       const cleanedFormData = {
         ...formData,
         ingredients: formData.ingredients.filter(ing => ing.trim() !== ''),
+        instructions: formData.instructions.filter(inst => inst.trim() !== ''),
       };
 
       await updateRecipe(id, cleanedFormData);
@@ -302,19 +330,43 @@ const EditRecipe = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Instructions"
-                name="instructions"
-                value={formData.instructions}
-                onChange={handleChange}
-                error={!!errors.instructions}
-                helperText={errors.instructions}
-                multiline
-                rows={6}
-                required
-                disabled={isSubmitting}
-              />
+              <Typography variant="h6" gutterBottom>
+                Instructions
+              </Typography>
+              <Stack spacing={2}>
+                {formData.instructions.map((instruction, index) => (
+                  <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <TextField
+                      fullWidth
+                      label={`Step ${index + 1}`}
+                      value={instruction}
+                      onChange={(e) => handleInstructionChange(index, e.target.value)}
+                      error={!!errors.instructions}
+                      helperText={index === 0 ? errors.instructions : ''}
+                      multiline
+                      rows={2}
+                      disabled={isSubmitting}
+                    />
+                    <IconButton 
+                      onClick={() => removeInstruction(index)}
+                      disabled={formData.instructions.length === 1 || isSubmitting}
+                      color="error"
+                      sx={{ flexShrink: 0 }}
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  </Box>
+                ))}
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={addInstruction}
+                  variant="outlined"
+                  sx={{ alignSelf: 'flex-start' }}
+                  disabled={isSubmitting}
+                >
+                  Add Step
+                </Button>
+              </Stack>
             </Grid>
 
             <Grid item xs={12}>
