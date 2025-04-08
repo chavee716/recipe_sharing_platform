@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRecipes } from '../context/RecipeContext';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import RecipeCard from '../components/RecipeCard';
+import { useNavigate } from 'react-router-dom';
 
 const MotionPaper = motion(Paper);
 
@@ -38,6 +39,7 @@ const Profile = () => {
   const [updateError, setUpdateError] = useState('');
   const [updateSuccess, setUpdateSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const favoriteRecipes = recipes.filter(recipe => 
     user?.favorites?.includes(recipe.id)
@@ -315,6 +317,31 @@ const Profile = () => {
                           ? "You haven't saved any favorites yet."
                           : "You haven't created any recipes yet."}
                       </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+                        {activeTab === 0 ? (
+                          <Button
+                            startIcon={<EditIcon />}
+                            onClick={() => navigate('/')}
+                            sx={{
+                              color: '#4CAF50',
+                              '&:hover': { bgcolor: '#E8F5E9' }
+                            }}
+                          >
+                            Explore Recipes
+                          </Button>
+                        ) : (
+                          <Button
+                            startIcon={<EditIcon />}
+                            onClick={() => navigate('/create-recipe')}
+                            sx={{
+                              color: '#4CAF50',
+                              '&:hover': { bgcolor: '#E8F5E9' }
+                            }}
+                          >
+                            Create Recipe
+                          </Button>
+                        )}
+                      </Box>
                     </Grid>
                   )}
                 </Grid>
