@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Box, Link, CircularProgress, Paper } from '@mui/material';
+import { TextField, Button, Typography, Box, Link, CircularProgress, Paper, Container } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import AuthPageContainer from '../components/AuthPageContainer';
 import { useThemeMode } from '../context/ThemeContext';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -43,7 +43,6 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -57,95 +56,103 @@ const Login = () => {
   };
 
   return (
-    <AuthPageContainer>
-      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
-        Welcome Back
-      </Typography>
-      <Box component="form" onSubmit={handleSubmit} noValidate>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          label="Email Address"
-          name="email"
-          autoComplete="email"
-          autoFocus
-          value={formData.email}
-          onChange={handleChange}
-          error={!!errors.email}
-          helperText={errors.email}
-          disabled={isSubmitting}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="Password"
-          type="password"
-          id="password"
-          autoComplete="current-password"
-          value={formData.password}
-          onChange={handleChange}
-          error={!!errors.password}
-          helperText={errors.password}
-          disabled={isSubmitting}
-        />
-        {errors.submit && (
-          <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-            {errors.submit}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom align="center">
+            Welcome Back
           </Typography>
-        )}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? <CircularProgress size={24} /> : 'Sign In'}
-        </Button>
-        <Box sx={{ textAlign: 'center' }}>
-          <Link component={RouterLink} to="/register" variant="body2">
-            Don't have an account? Sign up
-          </Link>
-        </Box>
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={formData.email}
+              onChange={handleChange}
+              error={!!errors.email}
+              helperText={errors.email}
+              disabled={isSubmitting}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              error={!!errors.password}
+              helperText={errors.password}
+              disabled={isSubmitting}
+            />
+            {errors.submit && (
+              <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+                {errors.submit}
+              </Typography>
+            )}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <CircularProgress size={24} /> : 'Sign In'}
+            </Button>
+            <Box sx={{ textAlign: 'center' }}>
+              <Link component={RouterLink} to="/register" variant="body2">
+                Don't have an account? Sign up
+              </Link>
+            </Box>
 
-        {/* Test User Information */}
-        <Paper 
-          elevation={0}
-          sx={{ 
-            mt: 4, 
-            p: 2, 
-            bgcolor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
-            borderRadius: 2
-          }}
-        >
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Test User Credentials
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => handleTestUserClick('test@example.com', 'password123')}
-              sx={{ textTransform: 'none' }}
+            {/* Test User Information */}
+            <Paper 
+              elevation={0}
+              sx={{ 
+                mt: 4, 
+                p: 2, 
+                bgcolor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                borderRadius: 2
+              }}
             >
-              Test User: test@example.com / password123
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => handleTestUserClick('demo@example.com', 'demo123')}
-              sx={{ textTransform: 'none' }}
-            >
-              Demo User: demo@example.com / demo123
-            </Button>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Test User Credentials
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => handleTestUserClick('test@example.com', 'password123')}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Test User: test@example.com / password123
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => handleTestUserClick('demo@example.com', 'demo123')}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Demo User: demo@example.com / demo123
+                </Button>
+              </Box>
+            </Paper>
           </Box>
         </Paper>
-      </Box>
-    </AuthPageContainer>
+      </Container>
+    </motion.div>
   );
 };
 

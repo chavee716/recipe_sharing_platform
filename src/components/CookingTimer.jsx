@@ -53,7 +53,7 @@ const CookingTimer = ({ initialTime }) => {
         flexDirection: 'column',
         alignItems: 'center',
         gap: 2,
-        bgcolor: darkMode ? 'background.paper' : '#fff',
+        bgcolor: darkMode ? 'rgb(66, 61, 61)' : 'rgb(207, 207, 207)',
         borderRadius: 2,
       }}
     >

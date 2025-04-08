@@ -18,6 +18,8 @@ import {
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useThemeMode } from '../context/ThemeContext';
+import { motion } from 'framer-motion';
+import RecipeCard from '../components/RecipeCard';
 
 const Favorites = () => {
   const { user } = useAuth();
@@ -30,102 +32,81 @@ const Favorites = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '70vh' }}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <Typography variant="h6">Loading favorites...</Typography>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <Typography variant="h6" color="error">Error loading favorites: {error}</Typography>
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          borderRadius: 4,
-          bgcolor: darkMode ? 'background.paper' : '#fff',
-          mb: 4
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-          <FavoriteIcon
-            sx={{
-              fontSize: 40,
-              color: theme.palette.primary.main,
-              mr: 2
-            }}
-          />
-          <Typography variant="h4" component="h1" gutterBottom>
-            My Favorite Recipes
-          </Typography>
-        </Box>
-
-        {favoriteRecipes.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              You haven't added any recipes to your favorites yet
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            bgcolor: darkMode ? 'background.paper' : '#fff',
+            mb: 4
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+            <FavoriteIcon
+              sx={{
+                fontSize: 40,
+                color: theme.palette.primary.main,
+                mr: 2
+              }}
+            />
+            <Typography variant="h4" component="h1" gutterBottom>
+              My Favorite Recipes
             </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate('/')}
-              sx={{ mt: 2 }}
-            >
-              Browse Recipes
-            </Button>
           </Box>
-        ) : (
-          <Grid container spacing={3}>
-            {favoriteRecipes.map((recipe) => (
-              <Grid item xs={12} sm={6} md={4} key={recipe.id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'scale(1.02)',
-                      boxShadow: 6
-                    }
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={recipe.image}
-                    alt={recipe.title}
-                    sx={{
-                      objectFit: 'cover',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => navigate(`/recipe/${recipe.id}`)}
-                  />
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography gutterBottom variant="h6" component="h2">
-                      {recipe.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {recipe.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Paper>
-    </Container>
+
+          {favoriteRecipes.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                You haven't added any recipes to your favorites yet
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate('/')}
+                sx={{ mt: 2 }}
+              >
+                Browse Recipes
+              </Button>
+            </Box>
+          ) : (
+            <Grid container spacing={3}>
+              {favoriteRecipes.map((recipe) => (
+                <Grid item xs={12} sm={6} md={4} key={recipe.id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <RecipeCard recipe={recipe} />
+                  </motion.div>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Paper>
+      </Container>
+    </motion.div>
   );
 };
 

@@ -19,6 +19,7 @@ import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 import { useThemeMode } from '../context/ThemeContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const CreateRecipe = () => {
   const { darkMode } = useThemeMode();
@@ -136,175 +137,173 @@ const CreateRecipe = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          p: 4,
-          bgcolor: darkMode ? 'background.paper' : '#fff',
-          borderRadius: 2
-        }}
-      >
-        <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
-          Create New Recipe
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit} noValidate>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Recipe Title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                error={!!errors.title}
-                helperText={errors.title}
-                required
-                disabled={isSubmitting}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                error={!!errors.description}
-                helperText={errors.description}
-                multiline
-                rows={3}
-                required
-                disabled={isSubmitting}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Cooking Time (minutes)"
-                name="cookingTime"
-                type="number"
-                value={formData.cookingTime}
-                onChange={handleChange}
-                error={!!errors.cookingTime}
-                helperText={errors.cookingTime}
-                disabled={isSubmitting}
-                inputProps={{ min: 1 }}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Servings"
-                name="servings"
-                type="number"
-                value={formData.servings}
-                onChange={handleChange}
-                error={!!errors.servings}
-                helperText={errors.servings}
-                disabled={isSubmitting}
-                inputProps={{ min: 1 }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Ingredients
-              </Typography>
-              <Stack spacing={2}>
-                {formData.ingredients.map((ingredient, index) => (
-                  <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <TextField
-                      fullWidth
-                      label={`Ingredient ${index + 1}`}
-                      value={ingredient}
-                      onChange={(e) => handleIngredientChange(index, e.target.value)}
-                      error={!!errors.ingredients}
-                      helperText={index === 0 ? errors.ingredients : ''}
-                      disabled={isSubmitting}
-                    />
-                    <IconButton 
-                      onClick={() => removeIngredient(index)}
-                      disabled={formData.ingredients.length === 1 || isSubmitting}
-                      color="error"
-                      sx={{ flexShrink: 0 }}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                  </Box>
-                ))}
-                <Button
-                  startIcon={<AddIcon />}
-                  onClick={addIngredient}
-                  variant="outlined"
-                  sx={{ alignSelf: 'flex-start' }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Create New Recipe
+          </Typography>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Recipe Title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  error={!!errors.title}
+                  helperText={errors.title}
+                  required
                   disabled={isSubmitting}
-                >
-                  Add Ingredient
-                </Button>
-              </Stack>
-            </Grid>
+                />
+              </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Instructions"
-                name="instructions"
-                value={formData.instructions}
-                onChange={handleChange}
-                error={!!errors.instructions}
-                helperText={errors.instructions}
-                multiline
-                rows={6}
-                required
-                disabled={isSubmitting}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Image URL"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="Enter the URL of your recipe image"
-                disabled={isSubmitting}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 2 }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate('/')}
-                  sx={{ minWidth: 120 }}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  error={!!errors.description}
+                  helperText={errors.description}
+                  multiline
+                  rows={3}
+                  required
                   disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  sx={{ minWidth: 120 }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Cooking Time (minutes)"
+                  name="cookingTime"
+                  type="number"
+                  value={formData.cookingTime}
+                  onChange={handleChange}
+                  error={!!errors.cookingTime}
+                  helperText={errors.cookingTime}
                   disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    'Create Recipe'
-                  )}
-                </Button>
-              </Box>
+                  inputProps={{ min: 1 }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Servings"
+                  name="servings"
+                  type="number"
+                  value={formData.servings}
+                  onChange={handleChange}
+                  error={!!errors.servings}
+                  helperText={errors.servings}
+                  disabled={isSubmitting}
+                  inputProps={{ min: 1 }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>
+                  Ingredients
+                </Typography>
+                <Stack spacing={2}>
+                  {formData.ingredients.map((ingredient, index) => (
+                    <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <TextField
+                        fullWidth
+                        label={`Ingredient ${index + 1}`}
+                        value={ingredient}
+                        onChange={(e) => handleIngredientChange(index, e.target.value)}
+                        error={!!errors.ingredients}
+                        helperText={index === 0 ? errors.ingredients : ''}
+                        disabled={isSubmitting}
+                      />
+                      <IconButton 
+                        onClick={() => removeIngredient(index)}
+                        disabled={formData.ingredients.length === 1 || isSubmitting}
+                        color="error"
+                        sx={{ flexShrink: 0 }}
+                      >
+                        <RemoveIcon />
+                      </IconButton>
+                    </Box>
+                  ))}
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={addIngredient}
+                    variant="outlined"
+                    sx={{ alignSelf: 'flex-start' }}
+                    disabled={isSubmitting}
+                  >
+                    Add Ingredient
+                  </Button>
+                </Stack>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Instructions"
+                  name="instructions"
+                  value={formData.instructions}
+                  onChange={handleChange}
+                  error={!!errors.instructions}
+                  helperText={errors.instructions}
+                  multiline
+                  rows={6}
+                  required
+                  disabled={isSubmitting}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Image URL"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  placeholder="Enter the URL of your recipe image"
+                  disabled={isSubmitting}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => navigate('/')}
+                    sx={{ minWidth: 120 }}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    sx={{ minWidth: 120 }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : (
+                      'Create Recipe'
+                    )}
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-      </Paper>
+          </form>
+        </Paper>
+      </Container>
 
       <Snackbar 
         open={snackbar.open} 
@@ -320,7 +319,7 @@ const CreateRecipe = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </motion.div>
   );
 };
 
