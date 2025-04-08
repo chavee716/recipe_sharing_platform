@@ -30,17 +30,6 @@ npm start
 
 The app will open in your browser at `http://localhost:3000`.
 
-## Test Accounts
-
-For testing purposes, you can use these accounts:
-
-1. Test User:
-   - Email: test@example.com
-   - Password: password123
-
-2. Demo User:
-   - Email: demo@example.com
-   - Password: demo123
 
 Technologies Used
 
