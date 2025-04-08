@@ -44,7 +44,9 @@ const Profile = () => {
   );
 
   const userRecipes = recipes.filter(recipe => 
-    recipe.creatorId === user?.id || recipe.creator === user?.id
+    recipe.userId === user?.id || 
+    recipe.creator === user?.id || 
+    recipe.creatorId === user?.id
   );
 
   const handleTabChange = (event, newValue) => {

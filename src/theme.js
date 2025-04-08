@@ -77,7 +77,7 @@ const getTheme = (darkMode) => createTheme({
     h6: {
       fontWeight: 500,
       fontSize: '1rem',
-      color: '#5D4037', // Brown
+      color: darkMode ? '#FFFFFF' : '#5D4037', // Brown
     },
     body1: {
       fontSize: '1rem',

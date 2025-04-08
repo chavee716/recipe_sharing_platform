@@ -247,35 +247,98 @@ export const auth = {
     return user ? JSON.parse(user) : null;
   },
 
+  // Get all users from localStorage
+  getUsers: () => {
+    const users = localStorage.getItem('users');
+    return users ? JSON.parse(users) : {};
+  },
+
+  // Save users to localStorage
+  saveUsers: (users) => {
+    localStorage.setItem('users', JSON.stringify(users));
+  },
+
   // Login
   login: async (credentials) => {
     await delay(500);
-    // Mock validation
-    if (credentials.email === "test@example.com" && credentials.password === "password") {
-      const user = {
-        id: "user123",
-        email: credentials.email,
-        username: "TestUser",
-        favorites: []
-      };
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      return user;
+    const users = auth.getUsers();
+    
+    // Check if user exists in the users list
+    if (users[credentials.email] && users[credentials.email].password === credentials.password) {
+      localStorage.setItem('currentUser', JSON.stringify(users[credentials.email].user));
+      return users[credentials.email].user;
     }
+    
+    // Check test users as fallback
+    const testUsers = {
+      "test@example.com": {
+        password: "password123",
+        user: {
+          id: "test123",
+          email: "test@example.com",
+          username: "TestUser",
+          favorites: ["1", "2"],
+          profileImage: "https://i.pravatar.cc/150?img=1",
+          bio: "I love cooking and trying new recipes!",
+          createdAt: new Date().toISOString()
+        }
+      },
+      "demo@example.com": {
+        password: "demo123",
+        user: {
+          id: "demo123",
+          email: "demo@example.com",
+          username: "DemoUser",
+          favorites: ["3"],
+          profileImage: "https://i.pravatar.cc/150?img=2",
+          bio: "Food enthusiast and recipe collector",
+          createdAt: new Date().toISOString()
+        }
+      }
+    };
+
+    const testUser = testUsers[credentials.email];
+    if (testUser && testUser.password === credentials.password) {
+      localStorage.setItem('currentUser', JSON.stringify(testUser.user));
+      return testUser.user;
+    }
+
     throw new Error('Invalid credentials');
   },
 
   // Register
   register: async (userData) => {
     await delay(500);
-    // Mock registration
-    const user = {
+    const users = auth.getUsers();
+    
+    // Check if email already exists
+    if (users[userData.email]) {
+      throw new Error('Email already registered');
+    }
+
+    // Create new user
+    const newUser = {
       id: Date.now().toString(),
       email: userData.email,
       username: userData.username,
-      favorites: []
+      favorites: [],
+      profileImage: "https://i.pravatar.cc/150?img=3",
+      bio: "New recipe enthusiast",
+      createdAt: new Date().toISOString()
     };
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    return user;
+
+    // Add user to users list
+    users[userData.email] = {
+      password: userData.password,
+      user: newUser
+    };
+
+    // Save updated users list
+    auth.saveUsers(users);
+    
+    // Set as current user
+    localStorage.setItem('currentUser', JSON.stringify(newUser));
+    return newUser;
   },
 
   // Logout

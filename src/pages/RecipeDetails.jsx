@@ -37,6 +37,7 @@ import {
   Share
 } from '@mui/icons-material';
 import { useThemeMode } from '../context/ThemeContext';
+import CookingTimer from '../components/CookingTimer';
 
 const RecipeDetails = () => {
   const { id } = useParams();
@@ -230,6 +231,9 @@ const RecipeDetails = () => {
                 label={`${recipe.servings} servings`}
                 variant="outlined"
               />
+            </Box>
+            <Box sx={{ mb: 3 }}>
+              <CookingTimer initialTime={recipe.cookingTime} />
             </Box>
             <Typography variant="body1" paragraph>
               {recipe.description}

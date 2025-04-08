@@ -18,10 +18,12 @@ import {
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 import { useThemeMode } from '../context/ThemeContext';
 import { useRecipes } from '../context/RecipeContext';
+import { useAuth } from '../context/AuthContext';
 
 const CreateRecipe = () => {
   const { darkMode } = useThemeMode();
   const { createRecipe } = useRecipes();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [formData, setFormData] = useState({
@@ -94,7 +96,9 @@ const CreateRecipe = () => {
         rating: 0,
         reviews: [],
         createdAt: new Date().toISOString(),
-        userId: 'current-user', // This would normally come from auth context
+        userId: user.id, // Set the actual user ID
+        creator: user.id, // Add creator field
+        creatorId: user.id, // Add creatorId field for backward compatibility
       };
 
       await createRecipe(cleanedFormData);

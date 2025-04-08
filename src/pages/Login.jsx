@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Box, Link, CircularProgress } from '@mui/material';
+import { TextField, Button, Typography, Box, Link, CircularProgress, Paper } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AuthPageContainer from '../components/AuthPageContainer';
+import { useThemeMode } from '../context/ThemeContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { darkMode } = useThemeMode();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -48,6 +50,10 @@ const Login = () => {
         [name]: ''
       }));
     }
+  };
+
+  const handleTestUserClick = (email, password) => {
+    setFormData({ email, password });
   };
 
   return (
@@ -105,6 +111,39 @@ const Login = () => {
             Don't have an account? Sign up
           </Link>
         </Box>
+
+        {/* Test User Information */}
+        <Paper 
+          elevation={0}
+          sx={{ 
+            mt: 4, 
+            p: 2, 
+            bgcolor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+            borderRadius: 2
+          }}
+        >
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+            Test User Credentials
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleTestUserClick('test@example.com', 'password123')}
+              sx={{ textTransform: 'none' }}
+            >
+              Test User: test@example.com / password123
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleTestUserClick('demo@example.com', 'demo123')}
+              sx={{ textTransform: 'none' }}
+            >
+              Demo User: demo@example.com / demo123
+            </Button>
+          </Box>
+        </Paper>
       </Box>
     </AuthPageContainer>
   );
