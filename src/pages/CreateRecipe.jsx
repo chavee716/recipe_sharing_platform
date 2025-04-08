@@ -1,115 +1,96 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { validateRecipeForm } from '../utils/validation';
+import { useRecipes } from '../context/RecipeContext';
+import { useAuth } from '../context/AuthContext';
 import {
   Container,
-  Box,
+  Paper,
   Typography,
   TextField,
   Button,
-  Paper,
-  IconButton,
-  Stack,
+  Box,
   Grid,
-  Snackbar,
+  IconButton,
+  Chip,
+  CircularProgress,
   Alert,
-  CircularProgress
+  Snackbar
 } from '@mui/material';
-import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
-import { useThemeMode } from '../context/ThemeContext';
-import { useRecipes } from '../context/RecipeContext';
-import { useAuth } from '../context/AuthContext';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 const CreateRecipe = () => {
-  const { darkMode } = useThemeMode();
+  const navigate = useNavigate();
   const { createRecipe } = useRecipes();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     ingredients: [''],
-    instructions: '',
-    image: '',
+    instructions: [''],
     cookingTime: 1,
     servings: 1,
-    difficulty: 'medium',
-    cuisine: '',
-    dietary: []
+    difficulty: '',
+    dietaryRestrictions: [],
+    image: ''
   });
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData?.title?.trim()) {
+      newErrors.title = 'Title is required';
     }
-  };
-
-  const handleIngredientChange = (index, value) => {
-    const newIngredients = [...formData.ingredients];
-    newIngredients[index] = value;
-    setFormData(prev => ({
-      ...prev,
-      ingredients: newIngredients
-    }));
-  };
-
-  const addIngredient = () => {
-    setFormData(prev => ({
-      ...prev,
-      ingredients: [...prev.ingredients, '']
-    }));
-  };
-
-  const removeIngredient = (index) => {
-    if (formData.ingredients.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        ingredients: prev.ingredients.filter((_, i) => i !== index)
-      }));
+    if (!formData?.description?.trim()) {
+      newErrors.description = 'Description is required';
     }
+    if (formData?.ingredients?.some(ing => !ing?.trim())) {
+      newErrors.ingredients = 'All ingredients must be filled';
+    }
+    if (formData?.instructions?.some(inst => !inst?.trim())) {
+      newErrors.instructions = 'All instructions must be filled';
+    }
+    if (!formData?.cookingTime || formData.cookingTime <= 0) {
+      newErrors.cookingTime = 'Cooking time must be greater than 0';
+    }
+    if (!formData?.servings || formData.servings <= 0) {
+      newErrors.servings = 'Number of servings must be greater than 0';
+    }
+    if (!formData?.difficulty) {
+      newErrors.difficulty = 'Difficulty level is required';
+    }
+    if (!formData?.image?.trim()) {
+      newErrors.image = 'Please add a photo URL for your recipe';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate servings and cooking time
-    if (formData.servings <= 0) {
-      setErrors(prev => ({ ...prev, servings: 'Servings must be greater than 0' }));
-      return;
-    }
-    
-    if (formData.cookingTime <= 0) {
-      setErrors(prev => ({ ...prev, cookingTime: 'Cooking time must be greater than 0' }));
-      return;
-    }
-
-    const { isValid, errors: validationErrors } = validateRecipeForm(formData);
-    
-    if (!isValid) {
-      setErrors(validationErrors);
+    if (!validateForm()) {
+      setSnackbar({
+        open: true,
+        message: 'Please fill in all required fields, including the image URL',
+        severity: 'error'
+      });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      setErrors(null);
-      
       const cleanedFormData = {
         ...formData,
         ingredients: formData.ingredients.filter(ing => ing.trim() !== ''),
-        userId: user.id,
-        creator: user.username,
-        creatorId: user.id,
+        instructions: formData.instructions.filter(inst => inst.trim() !== ''),
+        userId: user?.id,
+        creator: user?.username,
+        creatorId: user?.id,
         servings: Math.max(1, parseInt(formData.servings)),
         cookingTime: Math.max(1, parseInt(formData.cookingTime))
       };
@@ -120,7 +101,7 @@ const CreateRecipe = () => {
         message: 'Recipe created successfully!',
         severity: 'success'
       });
-      setTimeout(() => navigate('/'), 1500); // Navigate after showing success message
+      setTimeout(() => navigate('/'), 1500);
     } catch (err) {
       setSnackbar({
         open: true,
@@ -132,21 +113,77 @@ const CreateRecipe = () => {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const handleArrayChange = (arrayName, index, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [arrayName]: prev[arrayName].map((item, i) => 
+        i === index ? value : item
+      )
+    }));
+    if (errors[arrayName]) {
+      setErrors(prev => ({
+        ...prev,
+        [arrayName]: ''
+      }));
+    }
+  };
+
+  const handleAddItem = (arrayName) => {
+    setFormData(prev => ({
+      ...prev,
+      [arrayName]: [...prev[arrayName], '']
+    }));
+  };
+
+  const handleRemoveItem = (arrayName, index) => {
+    setFormData(prev => ({
+      ...prev,
+      [arrayName]: prev[arrayName].filter((_, i) => i !== index)
+    }));
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+  if (!user) {
+    return (
       <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="error">
+            Please log in to create a recipe
+          </Typography>
+        </Paper>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <Paper elevation={3} sx={{ p: 4 }}>
           <Typography variant="h4" component="h1" gutterBottom>
             Create New Recipe
           </Typography>
+
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -170,13 +207,93 @@ const CreateRecipe = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
+                  multiline
+                  rows={4}
                   error={!!errors.description}
                   helperText={errors.description}
-                  multiline
-                  rows={3}
                   required
                   disabled={isSubmitting}
                 />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>
+                  Ingredients
+                </Typography>
+                {formData.ingredients.map((ingredient, index) => (
+                  <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                    <TextField
+                      fullWidth
+                      label={`Ingredient ${index + 1}`}
+                      value={ingredient}
+                      onChange={(e) => handleArrayChange('ingredients', index, e.target.value)}
+                      error={!!errors.ingredients}
+                      required
+                      disabled={isSubmitting}
+                    />
+                    <IconButton
+                      onClick={() => handleRemoveItem('ingredients', index)}
+                      color="error"
+                      disabled={isSubmitting}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                ))}
+                {errors.ingredients && (
+                  <Typography color="error" variant="caption">
+                    {errors.ingredients}
+                  </Typography>
+                )}
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={() => handleAddItem('ingredients')}
+                  sx={{ mt: 1 }}
+                  disabled={isSubmitting}
+                >
+                  Add Ingredient
+                </Button>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>
+                  Instructions
+                </Typography>
+                {formData.instructions.map((instruction, index) => (
+                  <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                    <TextField
+                      fullWidth
+                      label={`Step ${index + 1}`}
+                      value={instruction}
+                      onChange={(e) => handleArrayChange('instructions', index, e.target.value)}
+                      multiline
+                      rows={2}
+                      error={!!errors.instructions}
+                      required
+                      disabled={isSubmitting}
+                    />
+                    <IconButton
+                      onClick={() => handleRemoveItem('instructions', index)}
+                      color="error"
+                      disabled={isSubmitting}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                ))}
+                {errors.instructions && (
+                  <Typography color="error" variant="caption">
+                    {errors.instructions}
+                  </Typography>
+                )}
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={() => handleAddItem('instructions')}
+                  sx={{ mt: 1 }}
+                  disabled={isSubmitting}
+                >
+                  Add Step
+                </Button>
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -189,6 +306,7 @@ const CreateRecipe = () => {
                   onChange={handleChange}
                   error={!!errors.cookingTime}
                   helperText={errors.cookingTime}
+                  required
                   disabled={isSubmitting}
                   inputProps={{ min: 1 }}
                 />
@@ -204,63 +322,33 @@ const CreateRecipe = () => {
                   onChange={handleChange}
                   error={!!errors.servings}
                   helperText={errors.servings}
+                  required
                   disabled={isSubmitting}
                   inputProps={{ min: 1 }}
                 />
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>
-                  Ingredients
-                </Typography>
-                <Stack spacing={2}>
-                  {formData.ingredients.map((ingredient, index) => (
-                    <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <TextField
-                        fullWidth
-                        label={`Ingredient ${index + 1}`}
-                        value={ingredient}
-                        onChange={(e) => handleIngredientChange(index, e.target.value)}
-                        error={!!errors.ingredients}
-                        helperText={index === 0 ? errors.ingredients : ''}
-                        disabled={isSubmitting}
-                      />
-                      <IconButton 
-                        onClick={() => removeIngredient(index)}
-                        disabled={formData.ingredients.length === 1 || isSubmitting}
-                        color="error"
-                        sx={{ flexShrink: 0 }}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                    </Box>
-                  ))}
-                  <Button
-                    startIcon={<AddIcon />}
-                    onClick={addIngredient}
-                    variant="outlined"
-                    sx={{ alignSelf: 'flex-start' }}
-                    disabled={isSubmitting}
-                  >
-                    Add Ingredient
-                  </Button>
-                </Stack>
-              </Grid>
-
-              <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Instructions"
-                  name="instructions"
-                  value={formData.instructions}
+                  label="Difficulty"
+                  name="difficulty"
+                  select
+                  value={formData.difficulty}
                   onChange={handleChange}
-                  error={!!errors.instructions}
-                  helperText={errors.instructions}
-                  multiline
-                  rows={6}
+                  error={!!errors.difficulty}
+                  helperText={errors.difficulty}
                   required
                   disabled={isSubmitting}
-                />
+                  SelectProps={{
+                    native: true
+                  }}
+                >
+                  <option value="">Select Difficulty</option>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </TextField>
               </Grid>
 
               <Grid item xs={12}>
@@ -270,17 +358,41 @@ const CreateRecipe = () => {
                   name="image"
                   value={formData.image}
                   onChange={handleChange}
-                  placeholder="Enter the URL of your recipe image"
+                  error={!!errors.image}
+                  helperText={errors.image || "Please add a photo URL for your recipe"}
+                  placeholder="https://example.com/recipe-image.jpg"
+                  required
                   disabled={isSubmitting}
                 />
               </Grid>
 
               <Grid item xs={12}>
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 2 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {['vegan', 'vegetarian', 'gluten-free', 'dairy-free'].map((restriction) => (
+                    <Chip
+                      key={restriction}
+                      label={restriction}
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          dietaryRestrictions: prev.dietaryRestrictions.includes(restriction)
+                            ? prev.dietaryRestrictions.filter(r => r !== restriction)
+                            : [...prev.dietaryRestrictions, restriction]
+                        }));
+                      }}
+                      color={formData.dietaryRestrictions.includes(restriction) ? 'primary' : 'default'}
+                      variant={formData.dietaryRestrictions.includes(restriction) ? 'filled' : 'outlined'}
+                      disabled={isSubmitting}
+                    />
+                  ))}
+                </Box>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                   <Button
                     variant="outlined"
                     onClick={() => navigate('/')}
-                    sx={{ minWidth: 120 }}
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -288,38 +400,33 @@ const CreateRecipe = () => {
                   <Button
                     type="submit"
                     variant="contained"
-                    color="primary"
-                    sx={{ minWidth: 120 }}
                     disabled={isSubmitting}
+                    startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
                   >
-                    {isSubmitting ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      'Create Recipe'
-                    )}
+                    {isSubmitting ? 'Creating...' : 'Create Recipe'}
                   </Button>
                 </Box>
               </Grid>
             </Grid>
           </form>
         </Paper>
-      </Container>
+      </motion.div>
 
-      <Snackbar 
-        open={snackbar.open} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
+        <Alert
+          onClose={handleCloseSnackbar}
           severity={snackbar.severity}
           variant="filled"
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </motion.div>
+    </Container>
   );
 };
 

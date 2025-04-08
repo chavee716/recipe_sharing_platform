@@ -38,6 +38,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FilterButtons from '../components/FilterButtons';
 import RecipeGrid from '../components/RecipeGrid';
 import SearchBar from '../components/SearchBar';
+import RecipeList from '../components/RecipeList';
 
 // Animated components using framer-motion
 const MotionGrid = motion(Grid);
@@ -50,7 +51,7 @@ const Home = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { darkMode } = useThemeMode();
-  const { recipes, loading, error, searchTerm, setSearchTerm } = useRecipes();
+  const { recipes, loading, error, searchTerm, setSearchTerm, fetchRecipes } = useRecipes();
   const [searchInput, setSearchInput] = useState(searchTerm);
   const [mounted, setMounted] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -58,6 +59,7 @@ const Home = () => {
   
   useEffect(() => {
     setMounted(true);
+    fetchRecipes();
   }, []);
   
   const handleSearchChange = (e) => {
@@ -67,10 +69,6 @@ const Home = () => {
   
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-  };
-
-  const handleFilterChange = (filter) => {
-    setActiveFilter(filter);
   };
 
   const handleSearch = (query) => {
@@ -108,19 +106,19 @@ const Home = () => {
     return filtered;
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <Typography variant="h6">Loading recipes...</Typography>
+      </Box>
+    );
+  }
+
   if (error) {
     return (
-      <Container>
-        <MotionTypography 
-          color="error" 
-          align="center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          {error}
-        </MotionTypography>
-      </Container>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+        <Typography variant="h6" color="error">Error loading recipes: {error}</Typography>
+      </Box>
     );
   }
 
@@ -261,7 +259,7 @@ const Home = () => {
 
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ 
-        py: 8, 
+        py: 10, 
         bgcolor: darkMode ? 'background.default' : '#F1F8E9',
         transition: 'background-color 0.3s ease'
       }}>
@@ -269,11 +267,13 @@ const Home = () => {
           <SearchBar onSearch={handleSearch} />
           <FilterButtons 
             activeFilter={activeFilter} 
-            onFilterChange={handleFilterChange}
+            onFilterChange={setActiveFilter}
           />
           <RecipeGrid recipes={getFilteredRecipes()} />
         </Box>
       </Container>
+
+      
     </Box>
   );
 };

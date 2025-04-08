@@ -1,57 +1,76 @@
 import React from 'react';
-import { Box, Button } from '@mui/material';
-import { useThemeMode } from '../context/ThemeContext';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TimerIcon from '@mui/icons-material/Timer';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import { Box, Button, Stack, useTheme } from '@mui/material';
+import { useRecipes } from '../context/RecipeContext';
 
 const FilterButtons = ({ activeFilter, onFilterChange }) => {
-  const { darkMode } = useThemeMode();
+  const theme = useTheme();
+  const { dietaryFilters, toggleDietaryFilter } = useRecipes();
 
-  const filters = [
-    { id: 'all', label: 'All Recipes', icon: <RestaurantIcon /> },
-    { id: 'trending', label: 'Trending', icon: <TrendingUpIcon /> },
-    { id: 'quick', label: 'Quick Meals', icon: <TimerIcon /> },
-    { id: 'popular', label: 'Popular', icon: <FavoriteIcon /> },
+  const mainFilters = [
+    { label: 'All Recipes', value: 'all' },
+    { label: 'Trending', value: 'trending' },
+    { label: 'Quick Meals', value: 'quick' },
+    { label: 'Popular', value: 'popular' }
+  ];
+
+  const dietaryOptions = [
+    { label: 'Vegan', value: 'vegan' },
+    { label: 'Vegetarian', value: 'vegetarian' },
+    { label: 'Gluten-Free', value: 'gluten-free' },
+    { label: 'Dairy-Free', value: 'dairy-free' },
+    { label: 'Nut-Free', value: 'nut-free' },
+    { label: 'Low-Carb', value: 'low-carb' },
+    { label: 'Keto', value: 'keto' },
+    { label: 'Paleo', value: 'paleo' }
   ];
 
   return (
-    <Box sx={{ display: 'flex', gap: 1, p: 2, overflowX: 'auto' }}>
-      {filters.map((filter) => (
-        <Button
-          key={filter.id}
-          startIcon={filter.icon}
-          onClick={() => onFilterChange(filter.id)}
-          variant={activeFilter === filter.id ? 'contained' : 'outlined'}
-          sx={{
-            minWidth: 'fit-content',
-            backgroundColor: activeFilter === filter.id 
-              ? 'primary.main'
-              : 'transparent',
-            color: activeFilter === filter.id
-              ? '#fff'
-              : darkMode 
-                ? 'rgba(255, 255, 255, 0.9)'
-                : 'rgba(0, 0, 0, 0.87)',
-            borderColor: darkMode 
-              ? 'rgba(255, 255, 255, 0.23)' 
-              : 'rgba(0, 0, 0, 0.23)',
-            '&:hover': {
-              backgroundColor: activeFilter === filter.id
-                ? 'primary.dark'
-                : darkMode
-                  ? 'rgba(255, 255, 255, 0.08)'
-                  : 'rgba(0, 0, 0, 0.08)',
-              borderColor: darkMode
-                ? 'rgba(255, 255, 255, 0.4)'
-                : 'rgba(0, 0, 0, 0.4)',
-            },
-          }}
-        >
-          {filter.label}
-        </Button>
-      ))}
+    <Box sx={{ mb: 4 }}>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        {mainFilters.map((filter) => (
+          <Button
+            key={filter.value}
+            variant={activeFilter === filter.value ? 'contained' : 'outlined'}
+            onClick={() => onFilterChange(filter.value)}
+            sx={{
+              mb: 1,
+              textTransform: 'none',
+              borderRadius: 2,
+              '&:hover': {
+                backgroundColor: activeFilter === filter.value 
+                  ? theme.palette.primary.dark 
+                  : theme.palette.primary.light,
+                color: 'white'
+              }
+            }}
+          >
+            {filter.label}
+          </Button>
+        ))}
+      </Stack>
+
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 2 }}>
+        {dietaryOptions.map((option) => (
+          <Button
+            key={option.value}
+            variant={dietaryFilters.includes(option.value) ? 'contained' : 'outlined'}
+            onClick={() => toggleDietaryFilter(option.value)}
+            sx={{
+              mb: 1,
+              textTransform: 'none',
+              borderRadius: 2,
+              '&:hover': {
+                backgroundColor: dietaryFilters.includes(option.value)
+                  ? theme.palette.secondary.dark
+                  : theme.palette.secondary.light,
+                color: 'white'
+              }
+            }}
+          >
+            {option.label}
+          </Button>
+        ))}
+      </Stack>
     </Box>
   );
 };

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
+import { useAuth } from './AuthContext';
 
 const RecipeContext = createContext();
 
@@ -12,6 +13,7 @@ export const useRecipes = () => {
 };
 
 export const RecipeProvider = ({ children }) => {
+  const { user } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,15 +132,31 @@ export const RecipeProvider = ({ children }) => {
     }
   };
 
+  const toggleDietaryFilter = (filter) => {
+    setDietaryFilters(prev => {
+      if (prev.includes(filter)) {
+        return prev.filter(f => f !== filter);
+      } else {
+        return [...prev, filter];
+      }
+    });
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setDietaryFilters([]);
+    setFilteredRecipes(recipes);
+  };
+
   const value = {
-    recipes,
-    filteredRecipes,
+    recipes: filteredRecipes,
     loading,
     error,
     searchTerm,
     setSearchTerm,
     dietaryFilters,
-    setDietaryFilters,
+    toggleDietaryFilter,
+    clearFilters,
     createRecipe,
     updateRecipe,
     deleteRecipe,
